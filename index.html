@@ -14,6 +14,7 @@
       --accent: #58a6ff;
       --green: #3fb950;
       --orange: #d29922;
+      --red: #f85149;
     }
     * { box-sizing: border-box; }
     body {
@@ -36,47 +37,205 @@
     }
     section h2 { font-size: 1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
     section p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    section p.desc { margin-bottom: 0.75rem; }
     ul { margin: 0.5rem 0 0 0; padding-left: 1.25rem; color: var(--muted); font-size: 0.9rem; }
     code { background: var(--bg); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; }
     .badge { display: inline-block; background: var(--green); color: var(--bg); padding: 0.15em 0.5em; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem; }
+    .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem; }
+    input[type="text"], input[type="file"] { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.4em 0.6em; border-radius: 4px; font-size: 0.9rem; }
+    input[type="text"] { min-width: 140px; }
+    button {
+      background: var(--accent); color: var(--bg); border: none; padding: 0.45em 0.9em; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 500;
+    }
+    button:hover { filter: brightness(1.1); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .out { margin-top: 0.5rem; padding: 0.5rem; background: var(--bg); border-radius: 4px; font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+    .out.ok { border-left: 3px solid var(--green); }
+    .out.err { border-left: 3px solid var(--red); }
+    .items-list { list-style: none; padding-left: 0; margin: 0.5rem 0 0 0; }
+    .items-list li { padding: 0.35rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+    .items-list li:last-child { border-bottom: none; }
+    .items-list code { flex: 0 0 auto; }
+    .items-list .val { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .small { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Taubyte Showcase</h1>
-    <p class="sub">This project demonstrates Taubyte resources and features.</p>
+    <p class="sub">Interactive demo using HTTP functions, Database, Storage, and Messaging.</p>
 
     <section>
-      <h2>HTTP Functions</h2>
-      <p>REST API powered by Taubyte HTTP functions (one per path + method).</p>
-      <ul>
-        <li><code>GET /api/health</code> — Health check</li>
-        <li><code>GET /api/items</code> — List items (Database)</li>
-        <li><code>POST /api/items</code> — Save item (Database)</li>
-        <li><code>GET /api/file?name=...</code> — Get file (Storage)</li>
-        <li><code>POST /api/file</code> — Upload file (Storage)</li>
-      </ul>
+      <h2>API base <span class="badge">optional</span></h2>
+      <p class="desc">If the API is on a different origin (e.g. Dream: API domain vs Web domain), set it below. Leave empty for same-origin.</p>
+      <div class="row">
+        <input type="text" id="apiBase" placeholder="e.g. http://2dn2hedy0.default.localtau:14105" style="min-width: 280px;" />
+      </div>
     </section>
 
     <section>
-      <h2>Database</h2>
-      <p>Key-value database (matcher: <code>showcase</code>) — used by get_items and save_item.</p>
+      <h2>Health <code>GET /api/health</code></h2>
+      <p class="desc">HTTP function — health check.</p>
+      <div class="row">
+        <button type="button" id="btnHealth">Check health</button>
+      </div>
+      <div id="healthOut" class="out" style="display: none;"></div>
     </section>
 
     <section>
-      <h2>Storage</h2>
-      <p>Object storage (matcher: <code>showcase_uploads</code>) — used by get_file and put_file. Streaming storage is also configured.</p>
+      <h2>Database — Items <code>GET/POST /api/items</code></h2>
+      <p class="desc">Key-value database (matcher: <code>showcase</code>) via get_items &amp; save_item.</p>
+      <div class="row">
+        <input type="text" id="itemKey" placeholder="Key" />
+        <input type="text" id="itemValue" placeholder="Value" />
+        <button type="button" id="btnAddItem">Add item</button>
+        <button type="button" id="btnRefreshItems">Refresh list</button>
+      </div>
+      <ul id="itemsList" class="items-list"></ul>
+      <div id="itemsOut" class="out" style="display: none;"></div>
     </section>
 
     <section>
-      <h2>Messaging & PubSub</h2>
-      <p>Messaging resource (channel match: <code>showcaseevents</code>) with an event_handler PubSub function.</p>
+      <h2>Storage — File <code>GET/POST /api/file</code></h2>
+      <p class="desc">Object storage (matcher: <code>showcase_uploads</code>) via get_file &amp; put_file.</p>
+      <p class="small">Upload: choose file and optional name. Get: enter name and open or download.</p>
+      <div class="row">
+        <input type="file" id="fileInput" />
+        <input type="text" id="fileName" placeholder="File name (optional)" />
+        <button type="button" id="btnUpload">Upload</button>
+      </div>
+      <div class="row" style="margin-top: 0.5rem;">
+        <input type="text" id="getFileName" placeholder="Name to get" />
+        <button type="button" id="btnGetFile">Get file</button>
+      </div>
+      <div id="fileOut" class="out" style="display: none;"></div>
     </section>
 
     <section>
-      <h2>Domains</h2>
-      <p>Generated domains for API and Web. Use your API domain to call the endpoints above.</p>
+      <h2>Messaging &amp; PubSub</h2>
+      <p>Channel <code>showcaseevents</code> — <code>event_handler</code> runs when messages are published (backend or tools). Not triggered from the browser.</p>
     </section>
   </div>
+
+  <script>
+    (function () {
+      function apiBase() { return (window.API_BASE || document.getElementById('apiBase').value || '').replace(/\/$/, ''); }
+      function apiUrl(path) { var b = apiBase(); return b ? b + path : path; }
+
+      function out(elId, text, isErr) {
+        var el = document.getElementById(elId);
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'out ' + (isErr ? 'err' : 'ok');
+        el.style.display = 'block';
+      }
+
+      function hideOut(elId) {
+        var el = document.getElementById(elId);
+        if (el) el.style.display = 'none';
+      }
+
+      // Health
+      document.getElementById('btnHealth').onclick = function () {
+        var btn = this;
+        btn.disabled = true;
+        hideOut('healthOut');
+        fetch(apiUrl('/api/health'))
+          .then(function (r) { return r.text(); })
+          .then(function (t) { out('healthOut', t, false); })
+          .catch(function (e) { out('healthOut', 'Error: ' + e.message, true); })
+          .finally(function () { btn.disabled = false; });
+      };
+
+      // Items: refresh list
+      function refreshItems() {
+        fetch(apiUrl('/api/items'))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var list = document.getElementById('itemsList');
+            list.innerHTML = '';
+            if (data.items && data.items.length) {
+              data.items.forEach(function (it) {
+                var li = document.createElement('li');
+                li.innerHTML = '<code>' + escapeHtml(it.key) + '</code><span class="val">' + escapeHtml(it.value) + '</span>';
+                list.appendChild(li);
+              });
+            } else {
+              var li = document.createElement('li');
+              li.textContent = 'No items yet. Add one above.';
+              li.style.color = 'var(--muted)';
+              list.appendChild(li);
+            }
+          })
+          .catch(function (e) {
+            out('itemsOut', 'Error: ' + e.message, true);
+          });
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      document.getElementById('btnRefreshItems').onclick = refreshItems;
+      refreshItems();
+
+      document.getElementById('btnAddItem').onclick = function () {
+        var key = document.getElementById('itemKey').value.trim();
+        var val = document.getElementById('itemValue').value;
+        if (!key) { out('itemsOut', 'Key is required', true); return; }
+        var btn = this;
+        btn.disabled = true;
+        hideOut('itemsOut');
+        fetch(apiUrl('/api/items'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: key, value: val })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.error) { out('itemsOut', data.error, true); return; }
+            document.getElementById('itemKey').value = '';
+            document.getElementById('itemValue').value = '';
+            refreshItems();
+          })
+          .catch(function (e) { out('itemsOut', 'Error: ' + e.message, true); })
+          .finally(function () { btn.disabled = false; });
+      };
+
+      // File upload (API expects raw body + X-File-Name header)
+      document.getElementById('btnUpload').onclick = function () {
+        var fileInput = document.getElementById('fileInput');
+        var name = document.getElementById('fileName').value.trim() || 'upload.dat';
+        if (!fileInput.files || !fileInput.files[0]) { out('fileOut', 'Choose a file first', true); return; }
+        var btn = this;
+        btn.disabled = true;
+        hideOut('fileOut');
+        fetch(apiUrl('/api/file'), {
+          method: 'POST',
+          headers: { 'X-File-Name': name },
+          body: fileInput.files[0]
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.error) { out('fileOut', data.error, true); return; }
+            out('fileOut', 'Uploaded: ' + (data.file || name), false);
+          })
+          .catch(function (e) { out('fileOut', 'Error: ' + e.message, true); })
+          .finally(function () { btn.disabled = false; });
+      };
+
+      // File get
+      document.getElementById('btnGetFile').onclick = function () {
+        var name = document.getElementById('getFileName').value.trim();
+        if (!name) { out('fileOut', 'Enter a file name', true); return; }
+        hideOut('fileOut');
+        var url = apiUrl('/api/file?name=' + encodeURIComponent(name));
+        window.open(url, '_blank');
+      };
+    })();
+  </script>
 </body>
 </html>
