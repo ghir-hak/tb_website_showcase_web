@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taubyte Showcase</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .sub { color: var(--muted); margin-bottom: 2rem; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    section h2 { font-size: 1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+    section p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    ul { margin: 0.5rem 0 0 0; padding-left: 1.25rem; color: var(--muted); font-size: 0.9rem; }
+    code { background: var(--bg); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; }
+    .badge { display: inline-block; background: var(--green); color: var(--bg); padding: 0.15em 0.5em; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Taubyte Showcase</h1>
+    <p class="sub">This project demonstrates Taubyte resources and features.</p>
+
+    <section>
+      <h2>HTTP Functions</h2>
+      <p>REST API powered by Taubyte HTTP functions (one per path + method).</p>
+      <ul>
+        <li><code>GET /api/health</code> — Health check</li>
+        <li><code>GET /api/items</code> — List items (Database)</li>
+        <li><code>POST /api/items</code> — Save item (Database)</li>
+        <li><code>GET /api/file?name=...</code> — Get file (Storage)</li>
+        <li><code>POST /api/file</code> — Upload file (Storage)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Database</h2>
+      <p>Key-value database (matcher: <code>showcase</code>) — used by get_items and save_item.</p>
+    </section>
+
+    <section>
+      <h2>Storage</h2>
+      <p>Object storage (matcher: <code>showcase_uploads</code>) — used by get_file and put_file. Streaming storage is also configured.</p>
+    </section>
+
+    <section>
+      <h2>Messaging & PubSub</h2>
+      <p>Messaging resource (channel match: <code>showcaseevents</code>) with an event_handler PubSub function.</p>
+    </section>
+
+    <section>
+      <h2>Domains</h2>
+      <p>Generated domains for API and Web. Use your API domain to call the endpoints above.</p>
+    </section>
+  </div>
+</body>
+</html>
